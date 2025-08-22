@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 struct CharacterResponse: Decodable {
     let info: Info
@@ -49,11 +50,11 @@ enum CharacterStatus: String, Codable, Hashable {
     case unknown = "unknown"
     
     // UI'da kullanmak için renk döndüren helper property
-    var color: String {
+    var color: UIColor {
         switch self {
-        case .alive: return "green"
-        case .dead: return "red"
-        case .unknown: return "gray"
+        case .alive: return .systemGreen
+        case .dead: return .systemRed
+        case .unknown: return .systemGray
         }
     }
 }

@@ -25,7 +25,6 @@ class HomeViewController: UIViewController {
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 8
-        layout.itemSize = CGSize(width: 100, height: 200) // temporary
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(CharacterCell.self, forCellWithReuseIdentifier: CharacterCell.identifier)
         collectionView.backgroundColor = .systemBackground
@@ -72,7 +71,7 @@ class HomeViewController: UIViewController {
     private func applyConstraints() {
         NSLayoutConstraint.activate([
             
-        titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+        titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
         titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
         titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
@@ -120,7 +119,10 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // Handle item selection
+        let character = viewModel.characters[indexPath.row]
+        let detailVC = DetailViewController()
+        detailVC.configureWithCharacter(with: character)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 

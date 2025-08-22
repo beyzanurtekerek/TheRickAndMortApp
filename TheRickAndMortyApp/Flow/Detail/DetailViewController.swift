@@ -21,8 +21,9 @@ class DetailViewController: UIViewController {
     
     private static func makeLabel() -> UILabel {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
+        label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
         label.textColor = .label
+        label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }
@@ -32,47 +33,6 @@ class DetailViewController: UIViewController {
     private let speciesLabel = DetailViewController.makeLabel()
     private let genderLabel = DetailViewController.makeLabel()
     private let locationLabel = DetailViewController.makeLabel()
-
-    
-//    private let nameLabel: UILabel = {
-//        let label = UILabel()
-//        label.font = UIFont.systemFont(ofSize: 14)
-//        label.textColor = .label
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        return label
-//    }()
-//    
-//    private let statusLabel: UILabel = {
-//        let label = UILabel()
-//        label.font = UIFont.systemFont(ofSize: 14)
-//        label.textColor = .label
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        return label
-//    }()
-//    
-//    private let speciesLabel: UILabel = {
-//        let label = UILabel()
-//        label.font = UIFont.systemFont(ofSize: 14)
-//        label.textColor = .label
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        return label
-//    }()
-//    
-//    private let genderLabel: UILabel = {
-//        let label = UILabel()
-//        label.font = UIFont.systemFont(ofSize: 14)
-//        label.textColor = .label
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        return label
-//    }()
-//    
-//    private let locationLabel: UILabel = {
-//        let label = UILabel()
-//        label.font = UIFont.systemFont(ofSize: 14)
-//        label.textColor = .label
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        return label
-//    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -91,7 +51,7 @@ class DetailViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        imageView.layer.cornerRadius = imageView.frame.width / 2
+        imageView.layer.cornerRadius = 15
     }
     
     private func applyConstraints() {
@@ -100,39 +60,45 @@ class DetailViewController: UIViewController {
             imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            imageView.heightAnchor.constraint(equalToConstant: 200),
+            imageView.heightAnchor.constraint(equalToConstant: 300),
             
             nameLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 16),
             nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nameLabel.heightAnchor.constraint(equalToConstant: 30),
 
             statusLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
             statusLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             statusLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            statusLabel.heightAnchor.constraint(equalToConstant: 30),
             
             speciesLabel.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 8),
             speciesLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             speciesLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            speciesLabel.heightAnchor.constraint(equalToConstant: 30),
             
             genderLabel.topAnchor.constraint(equalTo: speciesLabel.bottomAnchor, constant: 8),
             genderLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             genderLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            genderLabel.heightAnchor.constraint(equalToConstant: 30),
             
             locationLabel.topAnchor.constraint(equalTo: genderLabel.bottomAnchor, constant: 8),
             locationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             locationLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            locationLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            locationLabel.heightAnchor.constraint(equalToConstant: 30)
             
         ])
     }
     
     private func setupUI() {
         guard let character = character else { return }
-        nameLabel.text = "Name 🖋️: \(character.name ?? "Unknown")"
-        statusLabel.text = "Status ✅: \(character.status.rawValue)" // enum old icin rawvalue
-        speciesLabel.text = "Species ⚡️: \(character.species ?? "Unknown")"
-        genderLabel.text = "Gender ⚧️: \(character.gender .rawValue)"
-        locationLabel.text = "Location 🌍: \(character.location?.name ?? "Unknown")"
+        navigationItem.title = character.name?.uppercased()
+        nameLabel.text = "• Name 🖋️: \(character.name ?? "Unknown")"
+        statusLabel.text = "• Status ✅: \(character.status.rawValue)" // enum old icin rawvalue
+        statusLabel.textColor = character.status.color
+        speciesLabel.text = "• Species ⚡️: \(character.species ?? "Unknown")"
+        genderLabel.text = "• Gender ⚧️: \(character.gender.rawValue) \(character.gender.icon)"
+        locationLabel.text = "• Location 🌍: \(character.location?.name ?? "Unknown")"
         
         if let imageString = character.image, let url = URL(string: imageString) {
             loadImage(from: url)

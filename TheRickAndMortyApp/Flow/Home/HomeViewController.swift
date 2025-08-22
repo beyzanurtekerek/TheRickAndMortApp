@@ -9,6 +9,7 @@ import UIKit
 
 class HomeViewController: UIViewController {
 
+    private var viewModel: HomeViewModelProtocol = HomeViewModel()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -20,7 +21,7 @@ class HomeViewController: UIViewController {
     }()
     
     private let layout = UICollectionViewFlowLayout()
-    private lazy var setupCollectionView: UICollectionView = {
+    private lazy var collectionView: UICollectionView = {
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 8
@@ -39,6 +40,8 @@ class HomeViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setupUI()
         applyConstraints()
+        setupBindings()
+        viewModel.fetchCharacters(page: 1)
     }
     
     override func viewDidLayoutSubviews() {
@@ -47,40 +50,72 @@ class HomeViewController: UIViewController {
         layout.sectionInset = UIEdgeInsets(top: 16, left: 12, bottom: 16, right: 12)
         layout.itemSize = CGSize(width: itemWidth, height: 200)
     }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.size.height
+        
+        if position > (contentHeight - frameHeight - 100) {
+            viewModel.fetchNextPageIfNeeded()
+        }
+    }
 
     private func setupUI() {
         view.addSubview(titleLabel)
-        view.addSubview(setupCollectionView)
+        view.addSubview(collectionView)
         
-        setupCollectionView.delegate = self
-        setupCollectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.dataSource = self
     }
     
-    private func applyConstraints() { // will be edit
+    private func applyConstraints() {
         NSLayoutConstraint.activate([
             
         titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
         titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
         titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-        setupCollectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
-        setupCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-        setupCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        setupCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+        collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+        collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
+    
+    private func setupBindings() {
+        viewModel.didUpdate = { [weak self] in
+            print("Karakterler geldi: \(self?.viewModel.characters.count ?? 0)")
+            DispatchQueue.main.async {
+                self?.collectionView.reloadData()
+            }
+        }
+        
+        viewModel.didFailWithError = { [weak self] error in
+            print("Hata: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self?.present(alert, animated: true)
+            }
+        }
+    }
+    
 }
 
-
+// MARK: - CollectionView DataSource & Delegate
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 20 // example count
+        return viewModel.characters.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CharacterCell", for: indexPath) as! CharacterCell
-        // Configure the cell with data
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CharacterCell.identifier, for: indexPath) as? CharacterCell else {
+            return UICollectionViewCell()
+        }
+        let character = viewModel.characters[indexPath.row]
+        cell.configureCharacterCell(with: character.image, title: character.name ?? "No Name")
         return cell
     }
     

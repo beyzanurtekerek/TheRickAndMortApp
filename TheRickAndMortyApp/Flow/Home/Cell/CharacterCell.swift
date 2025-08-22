@@ -32,7 +32,7 @@ class CharacterCell: UICollectionViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -82,9 +82,23 @@ class CharacterCell: UICollectionViewCell {
         layer.masksToBounds = false
     }
     
-    func configureCharacterCell(with image: UIImage?, title: String) {
-        imageView.image = image
+    func configureCharacterCell(with imageUrlString: String?, title: String) {
         nameLabel.text = title
+        imageView.image = nil
+        
+        guard let urlString = imageUrlString, let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self,
+                  let data = data,
+                  error == nil,
+                  let image = UIImage(data: data) else {
+                return
+            }
+            DispatchQueue.main.async {
+                self.imageView.image = image
+            }
+        }.resume()
     }
     
 }

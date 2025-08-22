@@ -9,54 +9,70 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
+    private var character: Character?
+    
     private let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
-        imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    private let nameLabel: UILabel = {
+    private static func makeLabel() -> UILabel {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
         label.textColor = .label
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
-    }()
+    }
     
-    private let statusLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .label
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    private let nameLabel = DetailViewController.makeLabel()
+    private let statusLabel = DetailViewController.makeLabel()
+    private let speciesLabel = DetailViewController.makeLabel()
+    private let genderLabel = DetailViewController.makeLabel()
+    private let locationLabel = DetailViewController.makeLabel()
+
     
-    private let speciesLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .label
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let genderLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .label
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let locationLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .label
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+//    private let nameLabel: UILabel = {
+//        let label = UILabel()
+//        label.font = UIFont.systemFont(ofSize: 14)
+//        label.textColor = .label
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
+//    
+//    private let statusLabel: UILabel = {
+//        let label = UILabel()
+//        label.font = UIFont.systemFont(ofSize: 14)
+//        label.textColor = .label
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
+//    
+//    private let speciesLabel: UILabel = {
+//        let label = UILabel()
+//        label.font = UIFont.systemFont(ofSize: 14)
+//        label.textColor = .label
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
+//    
+//    private let genderLabel: UILabel = {
+//        let label = UILabel()
+//        label.font = UIFont.systemFont(ofSize: 14)
+//        label.textColor = .label
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
+//    
+//    private let locationLabel: UILabel = {
+//        let label = UILabel()
+//        label.font = UIFont.systemFont(ofSize: 14)
+//        label.textColor = .label
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,19 +85,19 @@ class DetailViewController: UIViewController {
         view.addSubview(genderLabel)
         view.addSubview(locationLabel)
         
-        setupUI()
         applyConstraints()
-        
+        setupUI()
     }
-
-    private func setupUI() {
-        
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        imageView.layer.cornerRadius = imageView.frame.width / 2
     }
     
     private func applyConstraints() {
         NSLayoutConstraint.activate([
             
-            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 16),
+            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             imageView.heightAnchor.constraint(equalToConstant: 200),
@@ -110,8 +126,33 @@ class DetailViewController: UIViewController {
         ])
     }
     
-    public func configureWithCharacter() {
-        // This function will be used to configure the view with character data
+    private func setupUI() {
+        guard let character = character else { return }
+        nameLabel.text = "Name 🖋️: \(character.name ?? "Unknown")"
+        statusLabel.text = "Status ✅: \(character.status.rawValue)" // enum old icin rawvalue
+        speciesLabel.text = "Species ⚡️: \(character.species ?? "Unknown")"
+        genderLabel.text = "Gender ⚧️: \(character.gender .rawValue)"
+        locationLabel.text = "Location 🌍: \(character.location?.name ?? "Unknown")"
+        
+        if let imageString = character.image, let url = URL(string: imageString) {
+            loadImage(from: url)
+        }
+    }
+
+    private func loadImage(from url: URL) {
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            guard let data = data, let image = UIImage(data: data) else { return }
+            DispatchQueue.main.async {
+                self?.imageView.image = image
+            }
+        }.resume()
+    }
+    
+    public func configureWithCharacter(with character: Character) {
+        self.character = character
+        if isViewLoaded {
+            setupUI()
+        }
     }
     
     

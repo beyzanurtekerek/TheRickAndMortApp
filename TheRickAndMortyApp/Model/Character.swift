@@ -7,52 +7,55 @@
 
 import Foundation
 
-struct CharacterResponse: Codable {
+struct CharacterResponse: Decodable {
     let info: Info
     let results: [Character]
 }
 
-struct Info: Codable {
+struct Info: Decodable {
     let count: Int
     let pages: Int
     let next: String?
     let prev: String?
 }
 
-struct Character: Codable {
-    let id: Int
-    let name: String
+struct Character: Decodable {
+    let id: Int?
+    let name: String?
     let status: CharacterStatus
-    let species: String
+    let species: String?
     let type: String?
     let gender: CharacterGender
     let origin: Origin
-    let location: Location
-    let image: String
-    let episode: [URL]
-    let url: URL
-    let createdAt: Date
+    let location: Location?
+    let image: String?
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, status, species, type, gender, origin, location, image, episode, url
-        case createdAt = "created"
+        case id, name, status, species, type, gender, origin, location, image
     }
 }
 
-struct Origin: Codable {
-    let name: String
-    let url: URL?
+struct Origin: Decodable {
+    let name: String?
 }
 
-struct Location: Codable {
-    let name: String
-    let url: URL?
+struct Location: Decodable {
+    let name: String?
 }
 
 enum CharacterStatus: String, Codable, Hashable {
     case alive = "Alive"
     case dead = "Dead"
     case unknown = "unknown"
+    
+    // UI'da kullanmak için renk döndüren helper property
+    var color: String {
+        switch self {
+        case .alive: return "green"
+        case .dead: return "red"
+        case .unknown: return "gray"
+        }
+    }
 }
 
 enum CharacterGender: String, Codable, Hashable {
@@ -60,4 +63,14 @@ enum CharacterGender: String, Codable, Hashable {
     case male = "Male"
     case genderless = "Genderless"
     case unknown = "unknown"
+    
+    // UI'da kullanmak için simge döndüren helper property
+    var icon: String {
+        switch self {
+        case .female: return "♀"
+        case .male: return "♂"
+        case .genderless: return "⚪"
+        case .unknown: return "❓"
+        }
+    }
 }

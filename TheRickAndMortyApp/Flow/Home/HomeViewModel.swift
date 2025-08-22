@@ -14,6 +14,7 @@ protocol HomeViewModelProtocol {
     
     func fetchCharacters(page: Int)
     func fetchNextPageIfNeeded()
+    func shouldFetchNextPage(currentOffset: CGFloat, contentHeight: CGFloat, frameHeight: CGFloat) -> Bool
 }
 
 final class HomeViewModel: HomeViewModelProtocol {
@@ -57,4 +58,8 @@ final class HomeViewModel: HomeViewModelProtocol {
         fetchCharacters(page: currentPage + 1)
     }
     
+    func shouldFetchNextPage(currentOffset: CGFloat, contentHeight: CGFloat, frameHeight: CGFloat) -> Bool {
+        return currentOffset > (contentHeight - frameHeight - 100)
+    }
+
 }

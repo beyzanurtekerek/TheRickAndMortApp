@@ -51,11 +51,10 @@ class HomeViewController: UIViewController {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let position = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let frameHeight = scrollView.frame.size.height
-        
-        if position > (contentHeight - frameHeight - 100) {
+        if viewModel.shouldFetchNextPage(
+            currentOffset: scrollView.contentOffset.y,
+            contentHeight: scrollView.contentSize.height,
+            frameHeight: scrollView.frame.height) {
             viewModel.fetchNextPageIfNeeded()
         }
     }
@@ -74,6 +73,7 @@ class HomeViewController: UIViewController {
         titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
         titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
         titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+        titleLabel.heightAnchor.constraint(equalToConstant: 30),
             
         collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),

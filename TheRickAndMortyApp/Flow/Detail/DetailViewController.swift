@@ -110,6 +110,9 @@ class DetailViewController: UIViewController {
         ])
     }
     
+    public func configureWithCharacter() {
+        // This function will be used to configure the view with character data
+    }
     
     
     

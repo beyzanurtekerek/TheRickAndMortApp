@@ -9,8 +9,21 @@ import UIKit
 
 class HomeViewController: UIViewController {
 
-    private var viewModel: HomeViewModelProtocol = HomeViewModel()
     
+    // MARK: - Properties
+    private var viewModel: HomeViewModelProtocol
+    
+    // MARK: - Initializer
+    init(viewModel: HomeViewModelProtocol = HomeViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - UI Components
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Rick And Morty Characters"
@@ -33,7 +46,7 @@ class HomeViewController: UIViewController {
         return collectionView
     }()
     
-    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -50,6 +63,7 @@ class HomeViewController: UIViewController {
         layout.itemSize = CGSize(width: itemWidth, height: 200)
     }
     
+    // MARK: - UIScrollViewDelegate
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if viewModel.shouldFetchNextPage(
             currentOffset: scrollView.contentOffset.y,
@@ -58,7 +72,8 @@ class HomeViewController: UIViewController {
             viewModel.fetchNextPageIfNeeded()
         }
     }
-
+    
+    // MARK: - Setup UI
     private func setupUI() {
         view.addSubview(titleLabel)
         view.addSubview(collectionView)
@@ -69,29 +84,27 @@ class HomeViewController: UIViewController {
     
     private func applyConstraints() {
         NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            titleLabel.heightAnchor.constraint(equalToConstant: 30),
             
-        titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-        titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-        titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-        titleLabel.heightAnchor.constraint(equalToConstant: 30),
-            
-        collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
-        collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-        collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
+    // MARK: - Binding
     private func setupBindings() {
         viewModel.didUpdate = { [weak self] in
-            print("Karakterler geldi: \(self?.viewModel.characters.count ?? 0)")
             DispatchQueue.main.async {
                 self?.collectionView.reloadData()
             }
         }
         
         viewModel.didFailWithError = { [weak self] error in
-            print("Hata: \(error.localizedDescription)")
             DispatchQueue.main.async {
                 let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default))
@@ -120,9 +133,8 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let character = viewModel.characters[indexPath.row]
-        let detailVC = DetailViewController()
-        detailVC.configureWithCharacter(with: character)
+        let detailVM = DetailViewModel(character: character)
+        let detailVC = DetailViewController(viewModel: detailVM)
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }
-

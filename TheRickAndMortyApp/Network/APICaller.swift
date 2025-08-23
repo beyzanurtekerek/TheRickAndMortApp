@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: - Protocols
 protocol NetworkServiceProtocol {
     func fetch<T: Decodable>(url: URL, completion: @escaping (Result<T, NetworkError>) -> Void)
 }
@@ -15,10 +16,12 @@ protocol CharacterServiceProtocol {
     func fetchCharacters(page: Int, completion: @escaping (Result<CharacterResponse, NetworkError>) -> Void)
 }
 
+// MARK: - Constants
 struct Constants {
     static let baseURL = "https://rickandmortyapi.com/api/"
 }
 
+// MARK: - Errors
 enum NetworkError: Error {
     case invalidURL
     case requestFailed(Error)
@@ -27,6 +30,7 @@ enum NetworkError: Error {
     case decodingFailed(Error)
 }
 
+// MARK: - Network Service
 final class URLSessionNetworkService: NetworkServiceProtocol {
     func fetch<T: Decodable>(url: URL, completion: @escaping (Result<T, NetworkError>) -> Void) {
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
@@ -48,7 +52,7 @@ final class URLSessionNetworkService: NetworkServiceProtocol {
             
             do {
                 let decoder = JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase // Sadece bu kaldı
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let decoded = try decoder.decode(T.self, from: data)
                 completion(.success(decoded))
             } catch {
@@ -59,8 +63,8 @@ final class URLSessionNetworkService: NetworkServiceProtocol {
     }
 }
 
+// MARK: - API Caller
 final class APICaller: CharacterServiceProtocol {
-    
     static let shared = APICaller(service: URLSessionNetworkService())
     private let service: NetworkServiceProtocol
     
@@ -77,5 +81,4 @@ final class APICaller: CharacterServiceProtocol {
         }
         service.fetch(url: url, completion: completion)
     }
-
 }

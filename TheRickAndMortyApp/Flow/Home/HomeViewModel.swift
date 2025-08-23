@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: - Protocols
 protocol HomeViewModelProtocol {
     var characters: [Character] { get }
     var didUpdate: (() -> Void)? { get set }
@@ -17,8 +18,8 @@ protocol HomeViewModelProtocol {
     func shouldFetchNextPage(currentOffset: CGFloat, contentHeight: CGFloat, frameHeight: CGFloat) -> Bool
 }
 
+// MARK: - ViewModel
 final class HomeViewModel: HomeViewModelProtocol {
-    
     private let service: CharacterServiceProtocol
     private(set) var characters: [Character] = []
     

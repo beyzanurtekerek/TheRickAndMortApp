@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D8BED1CC2E5A2F1B0035683A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D8BED1CB2E5A2F1B0035683A /* Kingfisher */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		D85778B12E54D00B00348C01 /* TheRickAndMortyApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheRickAndMortyApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8BED1CC2E5A2F1B0035683A /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = TheRickAndMortyApp;
 			packageProductDependencies = (
+				D8BED1CB2E5A2F1B0035683A /* Kingfisher */,
 			);
 			productName = TheRickAndMortyApp;
 			productReference = D85778B12E54D00B00348C01 /* TheRickAndMortyApp.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = D85778A82E54D00B00348C01;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D8BED1CA2E5A2F1B0035683A /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D85778B22E54D00B00348C01 /* Products */;
 			projectDirPath = "";
@@ -335,6 +344,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D8BED1CA2E5A2F1B0035683A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D8BED1CB2E5A2F1B0035683A /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D8BED1CA2E5A2F1B0035683A /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D85778A92E54D00B00348C01 /* Project object */;
 }

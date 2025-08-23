@@ -6,11 +6,25 @@
 //
 
 import UIKit
+import Kingfisher
 
 class DetailViewController: UIViewController {
     
-    private var character: Character?
+    // MARK: - Properties
+    private var viewModel: DetailViewModelProtocol
     
+    // MARK: - Initializers
+    init(viewModel: DetailViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("Use init(viewModel:) or init(character:) instead.")
+    }
+    
+    // MARK: - UI Components
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -60,7 +74,7 @@ class DetailViewController: UIViewController {
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
-        label.textColor = .label
+        label.textColor = .white
         label.textAlignment = .center
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -79,6 +93,30 @@ class DetailViewController: UIViewController {
         return label
     }()
     
+    private let infoStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private let backgroundImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.clipsToBounds = true
+        return imageView
+    }()
+    
+    private let blurView: UIVisualEffectView = {
+        let blur = UIBlurEffect(style: .dark)
+        let view = UIVisualEffectView(effect: blur)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    // MARK: - Helper
     private func createInfoRow(icon: String, title: String, value: String) -> UIStackView {
         let iconLabel = UILabel()
         iconLabel.text = icon
@@ -105,23 +143,26 @@ class DetailViewController: UIViewController {
         
         return stackView
     }
-    
-    private let infoStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 16
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        return stackView
-    }()
-    
+
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemGray5
         setupUI()
         applyConstraints()
+        bindViewModel()
+        viewModel.viewDidLoad()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.viewWillAppear()
+    }
+    
+    // MARK: - Setup UI
     private func setupUI() {
+        view.addSubview(backgroundImageView)
+        backgroundImageView.addSubview(blurView)
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(imageContainer)
@@ -134,6 +175,16 @@ class DetailViewController: UIViewController {
     
     private func applyConstraints() {
         NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            blurView.topAnchor.constraint(equalTo: backgroundImageView.topAnchor),
+            blurView.leadingAnchor.constraint(equalTo: backgroundImageView.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: backgroundImageView.trailingAnchor),
+            blurView.bottomAnchor.constraint(equalTo: backgroundImageView.bottomAnchor),
+
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -145,7 +196,7 @@ class DetailViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            imageContainer.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            imageContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             imageContainer.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             imageContainer.widthAnchor.constraint(equalTo: contentView.widthAnchor, multiplier: 0.8),
             imageContainer.heightAnchor.constraint(equalTo: imageContainer.widthAnchor),
@@ -175,51 +226,43 @@ class DetailViewController: UIViewController {
         ])
     }
     
-    private func configureUI() {
-        guard let character = character else { return }
-        
-        navigationItem.title = character.name?.uppercased()
-        nameLabel.text = character.name ?? "Unknown Character"
-        
-        statusBadge.text = character.status.rawValue.uppercased()
-        statusBadge.backgroundColor = character.status.color
-        statusBadge.textColor = .white
-        
-        infoStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        let infoRows = [
-            createInfoRow(icon: "🧬", title: "Species", value: character.species ?? "Unknown"),
-            createInfoRow(icon: "🔮", title: "Type", value: character.type?.isEmpty == false ? character.type! : "Unknown"),
-            createInfoRow(icon: "⚧️", title: "Gender", value: "\(character.gender.rawValue) \(character.gender.icon)"),
-            createInfoRow(icon: "🪐", title: "Origin", value: character.origin.name ?? "Unknown"),
-            createInfoRow(icon: "🌍", title: "Location", value: character.location?.name ?? "Unknown")
-        ]
-        
-        infoRows.forEach { infoStackView.addArrangedSubview($0) }
-        
-        if let imageString = character.image, let url = URL(string: imageString) {
-            loadImage(from: url)
-        }
-    }
-    
-    private func loadImage(from url: URL) {
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-            guard let data = data, let image = UIImage(data: data) else { return }
-            DispatchQueue.main.async {
-                self?.imageView.image = image
+    // MARK: - Binding
+    private func bindViewModel() {
+        viewModel.onStateChange = { [weak self] state in
+            guard let self = self else { return }
+            self.navigationItem.title = state.navigationTitle
+            self.nameLabel.text = state.name
+            self.statusBadge.text = state.statusText
+            
+            let colors = self.colors(for: state.statusKind)
+            self.statusBadge.backgroundColor = colors.background
+            self.statusBadge.textColor = colors.text
+            
+            if let url = state.imageURL {
+                self.imageView.kf.setImage(with: url)
+                self.backgroundImageView.kf.setImage(with: url)
             }
-        }.resume()
-    }
-    
-    public func configureWithCharacter(with character: Character) {
-        self.character = character
-        if isViewLoaded {
-            configureUI()
+            
+            // Rebuild info rows
+            self.infoStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            state.infoRows.forEach { row in
+                self.infoStackView.addArrangedSubview(
+                    self.createInfoRow(icon: row.icon, title: row.title, value: row.value)
+                )
+            }
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        configureUI()
+    // MARK: - Helpers
+    private func colors(for kind: StatusKind) -> (background: UIColor, text: UIColor) {
+        switch kind {
+        case .alive:
+            return (.systemGreen, .white)
+        case .dead:
+            return (.systemRed, .white)
+        case .unknown:
+            return (.systemGray, .white)
+        }
     }
+    
 }

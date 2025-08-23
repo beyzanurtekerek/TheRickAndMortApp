@@ -6,9 +6,11 @@
 //
 
 import UIKit
+import Kingfisher
 
 class CharacterCell: UICollectionViewCell {
     
+    // MARK: - Properties
     static let identifier = "CharacterCell"
     
     private let imageView: UIImageView = {
@@ -18,13 +20,11 @@ class CharacterCell: UICollectionViewCell {
         imageView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.backgroundColor = UIColor.systemGray.withAlphaComponent(0.3) //deneme simdilik
         return imageView
     }()
     
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "Character Name" // Placeholder text
         label.font = UIFont.systemFont(ofSize: 14)
         label.numberOfLines = 2
         label.textColor = .label
@@ -33,7 +33,7 @@ class CharacterCell: UICollectionViewCell {
         return label
     }()
     
-    
+    // MARK:- Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear
@@ -47,6 +47,7 @@ class CharacterCell: UICollectionViewCell {
         fatalError()
     }
     
+    // MARK: - Setup UI
     private func setupUI(){
         contentView.addSubview(imageView)
         contentView.addSubview(nameLabel)
@@ -82,23 +83,17 @@ class CharacterCell: UICollectionViewCell {
         layer.masksToBounds = false
     }
     
+    // MARK: - Public Funcs
     func configureCharacterCell(with imageUrlString: String?, title: String) {
         nameLabel.text = title
-        imageView.image = nil
-        
-        guard let urlString = imageUrlString, let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self,
-                  let data = data,
-                  error == nil,
-                  let image = UIImage(data: data) else {
-                return
-            }
-            DispatchQueue.main.async {
-                self.imageView.image = image
-            }
-        }.resume()
+        if let url = URL(string: imageUrlString ?? "") {
+            imageView.kf.setImage(
+                with: url,
+                placeholder: UIImage(named: "placeholder")
+            )
+        } else {
+            imageView.image = UIImage(named: "placeholder")
+        }
     }
     
 }
